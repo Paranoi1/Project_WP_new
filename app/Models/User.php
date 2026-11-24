@@ -99,4 +99,17 @@ class User extends Authenticatable
 	{
 		return $this->hasMany(Submission::class, 'sbm_reviewedBy');
 	}
+
+		
+	public function courses()
+	{
+ 	return $this->belongsToMany(
+        	Course::class,
+        	'enrollment',
+        	'enr_user',
+        	'enr_course', 
+        	'id',         
+        	'crs_ID'      
+    	)->withPivot('enr_ID', 'enr_date');
+	}
 }

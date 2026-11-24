@@ -47,4 +47,16 @@ class Course extends Model
 	{
 		return $this->hasMany(Module::class, 'mod_course');
 	}
+
+	public function users()
+	{
+    return $this->belongsToMany(
+        User::class,
+        'enrollment',
+        'enr_course',
+        'enr_user',
+        'crs_ID',
+        'id'
+    )->withPivot('enr_ID', 'enr_date');
+}
 }
