@@ -31,7 +31,7 @@
         <div id="profile-menu" style="display: none;">
             <p>{{ $user->name }} (ID: {{ $user->id }})</p>
             <p>{{ $user->email }}</p>
-            <p>Роль: {{ $user->role->rl_name }}</p>
+            <p>{{ $user->role->rl_name }}</p>
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

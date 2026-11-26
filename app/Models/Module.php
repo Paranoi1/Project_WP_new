@@ -37,10 +37,10 @@ class Module extends Model
 		'mod_course'
 	];
 
-	public function course()
-	{
-		return $this->belongsTo(Course::class, 'mod_course');
-	}
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'mod_course', 'crs_ID');
+    }
 
 	public function assignments()
 	{

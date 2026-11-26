@@ -45,7 +45,7 @@ class Course extends Model
 
 	public function modules()
 	{
-		return $this->hasMany(Module::class, 'mod_course');
+		return $this->hasMany(Module::class, 'mod_course', 'crs_ID');
 	}
 
 	public function users()
