@@ -9,11 +9,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-/*
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-*/
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -25,14 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-/*
-Route::group([
-    'prefix' => 'admin', 
-    'as' => 'admin.', 
-    'middleware' => ['auth', 'admin']], function () {
-    Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
-});
-  */  
+
 Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
