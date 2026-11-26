@@ -1,9 +1,45 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+/* Welcome screen */
+.welcome-page {
+    min-height: 100vh;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+/* Button container */
+.welcome-buttons {
+    display: flex;
+    gap: 24px;
+}
+
+/* Shared button styles */
+.welcome-btn {
+    padding: 12px 32px;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+/* Login button */
+.login-btn {
+    background-color: #ec2222;
+}
+
+.login-btn:hover {
+    background-color: #6a1717;
+}
+
+/* Register button */
+.register-btn {
+    background-color: #575757;
+}
+
+.register-btn:hover {
+    background-color: #252525;
 }
