@@ -10,8 +10,6 @@ class DashboardController extends Controller
 {
     public function index(): View
     {   
-        // Временный костыль: работаем от лица пользователя с ID = 1
-        //$userId = 2;
 
         $user = User::with([
             'role',

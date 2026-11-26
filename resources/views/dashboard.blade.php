@@ -2,31 +2,44 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>LMS - Студенческая панель</title>
+    <title>LMS</title>
 </head>
 <body>
 
     <!-- Навигация (Сайдбар) -->
     <nav>
-        <h2>Навигация</h2>
+        <h2>Navigation</h2>
         <ul>
-            <li><button onclick="switchTab('dashboard')">Главная</button></li>
-            <li><button onclick="switchTab('courses')">Курсы ({{ $courses->count() }})</button></li>
-            <li><button onclick="switchTab('assignments')">Все задания ({{ $allAssignments->count() }})</button></li>
-            <li><button onclick="switchTab('calendar')">Календарь</button></li>
+            <li><button onclick="switchTab('dashboard')">Main</button></li>
+            <li><button onclick="switchTab('courses')">Courses ({{ $courses->count() }})</button></li>
+            <li><button onclick="switchTab('assignments')">Assignments ({{ $allAssignments->count() }})</button></li>
+            <li><button onclick="switchTab('calendar')">Calendar</button></li>
+            
+                @if (auth()->user()->role?->rl_name === 'Admin')
+                    <li>
+                        <a href="{{ route('admin.classes.index') }}" class="admin-btn">
+                            Manage Classes
+                        </a>
+                    </li>
+                @endif
+
             <!-- <li><button onclick="switchTab('events')">События ({{ $eventsFeed->count() }})</button></li> -->
         </ul>
         <hr>
-        <button onclick="document.getElementById('settings-modal').showModal()">Настройки</button>
-        <button onclick="toggleProfile()">Профиль ({{ $user->name }})</button>
+        <button onclick="toggleProfile()">Profile ({{ $user->name }})</button>
         
         <div id="profile-menu" style="display: none;">
-            <p><strong>{{ $user->name }}</strong> (ID: {{ $user->id }})</p>
+            <p>{{ $user->name }} (ID: {{ $user->id }})</p>
             <p>{{ $user->email }}</p>
             <p>Роль: {{ $user->role->rl_name }}</p>
-            <p>Технически университет - Варна</p>
-            <button disabled title="Отключено на время разработки">Сменить аккаунт</button>
-            <button disabled title="Отключено на время разработки">Выйти</button>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+
+                <button type="submit" class="logout-btn">
+                    Log out
+                </button>
+            </form>
         </div>
     </nav>
 
@@ -36,18 +49,17 @@
     <main>
         <!-- Главная -->
         <section id="tab-dashboard">
-            <h1>Главная</h1>
-            <p>Добро пожаловать в систему LMS, <strong>{{ $user->name }}</strong>!</p>
+            
             <ul>
-                <li>Подписанных курсов: <strong>{{ $courses->count() }}</strong></li>
-                <li>Всего заданий: <strong>{{ $allAssignments->count() }}</strong></li>
-                <li>Не сдано заданий: <strong>{{ $allAssignments->where('status', 'not_submitted')->count() }}</strong></li>
+                <li>Total Courses: <strong>{{ $courses->count() }}</strong></li>
+                <li>Total Assignments: <strong>{{ $allAssignments->count() }}</strong></li>
+                <li>Not Submitted Assignments: <strong>{{ $allAssignments->where('status', 'not_submitted')->count() }}</strong></li>
             </ul>
         </section>
 
         <!-- Список курсов -->
         <section id="tab-courses" style="display: none;">
-            <h1>Мои курсы</h1>
+            <h1>My courses</h1>
             <ul>
                 @forelse($courses as $course)
                     <li>
@@ -55,47 +67,47 @@
                             {{ $course->crs_title }}
                         </button>
                         @if($course->pivot && $course->pivot->enr_date)
-                            <small>(Дата записи: {{ \Carbon\Carbon::parse($course->pivot->enr_date)->format('d.m.Y') }})</small>
+                            <small>(Enrollment Date: {{ \Carbon\Carbon::parse($course->pivot->enr_date)->format('d.m.Y') }})</small>
                         @endif
                     </li>
                 @empty
-                    <li>Вы пока не записаны ни на один курс.</li>
+                    <li>You are not enrolled in any courses yet.</li>
                 @endforelse
             </ul>
         </section>
 
         <!-- Внутренняя страница курса (заполняется динамически из JS) -->
         <section id="course-details" style="display: none;">
-            <button onclick="switchTab('courses')">← Назад к списку курсов</button>
-            <h1 id="course-title">Название курса</h1>
+            <button onclick="switchTab('courses')">← Back to course list</button>
+            <h1 id="course-title">Course Title</h1>
             <p id="course-description" style="color: #555;"></p>
             
             <nav>
-                <button onclick="switchCourseTab('course-publications')">Публикации</button>
-                <button onclick="switchCourseTab('course-materials')">Материалы (Лекции)</button>
-                <button onclick="switchCourseTab('course-assignments')">Задания</button>
+                <button onclick="switchCourseTab('course-publications')">Publications</button>
+                <button onclick="switchCourseTab('course-materials')">Materials (Lectures)</button>
+                <button onclick="switchCourseTab('course-assignments')">Assignments</button>
             </nav>
             <br>
 
             <div id="course-publications">
-                <h3>Публикации</h3>
+                <h3>Publications</h3>
                 <div id="course-publications-list"></div>
             </div>
             
             <div id="course-materials" style="display: none;">
-                <h3>Учебные материалы и лекции</h3>
+                <h3>Materials (Lectures)</h3>
                 <ul id="course-materials-list"></ul>
             </div>
             
             <div id="course-assignments" style="display: none;">
-                <h3>Задания курса</h3>
+                <h3>Assignments</h3>
                 <ul id="course-assignments-list"></ul>
             </div>
         </section>
 
         <!-- Все задания -->
         <section id="tab-assignments" style="display: none;">
-            <h1>Все задания</h1>
+            <h1>Assignments</h1>
             <ul>
                 @forelse($allAssignments as $item)
                     <li>
@@ -105,26 +117,26 @@
                         <button onclick="openAssignmentModalById({{ $item['id'] }})">Просмотр</button>
                     </li>
                 @empty
-                    <li>У вас пока нет заданий по подписанным курсам.</li>
+                    <li>No assignments available.</li>
                 @endforelse
             </ul>
         </section>
 
         <!-- Календарь -->
         <section id="tab-calendar" style="display: none;">
-            <h1>Календарь</h1>
+            <h1>Calendar</h1>
             <ul>
                 @forelse($calendarItems as $cal)
                     <li><strong>{{ $cal['date'] }}</strong> — {{ $cal['text'] }}</li>
                 @empty
-                    <li>В календаре пока нет запланированных лекций и дедлайнов.</li>
+                    <li>No scheduled lectures or deadlines in the calendar.</li>
                 @endforelse
             </ul>
         </section>
 
         <!-- События (Уведомления) -->
         <section id="tab-events" style="display: none;">
-            <h1>Лента событий</h1>
+            <h1>Events Feed</h1>
             <ul>
                 @forelse($eventsFeed as $event)
                     <li>
@@ -134,7 +146,7 @@
                         </button>
                     </li>
                 @empty
-                    <li>Новых событий пока нет.</li>
+                    <li>No new events.</li>
                 @endforelse
             </ul>
         </section>
@@ -142,35 +154,23 @@
 
     <!-- Модальные окна -->
     <dialog id="assignment-modal">
-        <h2 id="modal-title">Задание</h2>
-        <p><strong>Курс:</strong> <span id="modal-course"></span></p>
-        <p><strong>Срок сдачи:</strong> <span id="modal-deadline"></span></p>
-        <p><strong>Макс. баллов:</strong> <span id="modal-max-score"></span></p>
-        <p><strong>Статус:</strong> <span id="modal-status"></span></p>
-        <p id="modal-feedback-row" style="display: none;"><strong>Комментарий преподавателя:</strong> <span id="modal-feedback"></span></p>
+        <h2 id="modal-title">Assignment</h2>
+        <p><strong>Course:</strong> <span id="modal-course"></span></p>
+        <p><strong>Deadline:</strong> <span id="modal-deadline"></span></p>
+        <p><strong>Max Points:</strong> <span id="modal-max-score"></span></p>
+        <p><strong>Status:</strong> <span id="modal-status"></span></p>
+        <p id="modal-feedback-row" style="display: none;"><strong>Comment:</strong> <span id="modal-feedback"></span></p>
         
         <div id="modal-upload-section">
-            <label>Прикрепить файл:</label>
+            <label>Attach File:</label>
             <input type="file">
-            <button onclick="alert('Файл загружен!')">Загрузить</button>
+            <button onclick="alert('File uploaded!')">Upload</button>
             <br><br>
-            <button onclick="alert('Задание отправлено на проверку!')">Сдать работу</button>
+            <button onclick="alert('Assignment submitted for review!')">Submit Work</button>
         </div>
         
         <br>
-        <button onclick="document.getElementById('assignment-modal').close()">Закрыть окно</button>
-    </dialog>
-
-    <dialog id="settings-modal">
-        <h2>Настройки</h2>
-        <label>Язык интерфейса:</label>
-        <select>
-            <option>Русский</option>
-            <option>Български</option>
-            <option>English</option>
-        </select>
-        <br><br>
-        <button onclick="document.getElementById('settings-modal').close()">Сохранить и закрыть</button>
+        <button onclick="document.getElementById('assignment-modal').close()">Close Window</button>
     </dialog>
 
     <!-- Скрипты логики -->

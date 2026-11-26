@@ -22,7 +22,7 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        $roles = Role::whereIn('rl_name', ['Student', 'Teacher'])->get();
+        $roles = Role::whereIn('rl_name', ['Student', 'Teacher', 'Admin'])->get();
 
         return view('auth.register', compact('roles'));
     }
@@ -39,7 +39,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'rl_ID' => ['required', Rule::exists('role', 'rl_ID')->whereIn('rl_name', ['Student', 'Teacher'])],
+            'rl_ID' => ['required', Rule::exists('role', 'rl_ID')->whereIn('rl_name', ['Student', 'Teacher', 'Admin'])],
         ]);
 
         $user = User::create([
